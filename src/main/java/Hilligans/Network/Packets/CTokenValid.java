@@ -1,5 +1,6 @@
 package Hilligans.Network.Packets;
 
+import Hilligans.Main;
 import Hilligans.Network.PacketBase;
 import Hilligans.Network.PacketData;
 import Hilligans.Network.ServerNetworkHandler;
@@ -27,6 +28,9 @@ public class CTokenValid extends PacketBase {
 
     @Override
     public void handle() {
-        ServerNetworkHandler.sendPacket(new STokenValid(username, TokenHandler.tokenValid(username,token,ip)));
+        String uuid = Main.database.getUUID(username);
+        if(Main.database.clientValid(username)) {
+            ServerNetworkHandler.sendPacket(new STokenValid(username, uuid, TokenHandler.tokenValid(uuid, token, ip)));
+        }
     }
 }

@@ -8,7 +8,8 @@ public class SAccountPacket extends PacketBase {
     String response;
 
     public SAccountPacket(String response) {
-        super(3);
+        super(0);
+        System.out.println(response);
         this.response = response;
     }
 

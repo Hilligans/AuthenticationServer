@@ -28,14 +28,14 @@ public class TokenHandler {
         return symbols[index % symbols.length];
     }
 
-    public static boolean  tokenValid(String username, String token, String ip) {
-        if(RedisInterface.clientValid(username) && RedisInterface.getStoredToken(username).equals(token)) {
-            long time = Integer.parseInt(RedisInterface.getTokenDelay(username));
-            RedisInterface.putTokenDelay(username,System.currentTimeMillis() + Main.TOKEN_VERIFY_DELAY * 1000);
+    public static boolean tokenValid(String uuid, String token, String ip) {
+        if(Main.database.getStoredToken(uuid).equals(token)) {
+            long time = Integer.parseInt(Main.database.getTokenDelay(uuid));
+            Main.database.putTokenDelay(uuid,System.currentTimeMillis() + Main.TOKEN_VERIFY_DELAY * 1000);
             long currentTime = System.currentTimeMillis();
-            if(RedisInterface.getIp(username).equals(ip)) {
+            if(Main.database.getIp(uuid).equals(ip)) {
                 if (currentTime - time > Main.TOKEN_VERIFY_DELAY * 1000) {
-                    long tokenExpire = Integer.parseInt(RedisInterface.getTokenTimeout(username));
+                    long tokenExpire = Integer.parseInt(Main.database.getTokenTimeout(uuid));
                     return tokenExpire > currentTime;
                 } else {
                     return false;
@@ -44,17 +44,17 @@ public class TokenHandler {
                 return false;
             }
         } else {
-            RedisInterface.putTokenDelay(username,System.currentTimeMillis() + Main.TOKEN_VERIFY_DELAY * 1000);
+            Main.database.putTokenDelay(uuid,System.currentTimeMillis() + Main.TOKEN_VERIFY_DELAY * 1000);
             return false;
         }
     }
 
-    public static String createNewToken(String username, String ip) {
+    public static String createNewToken(String uuid, String ip) {
         String token = getToken();
-        RedisInterface.putIp(username,ip);
-        RedisInterface.putToken(username,token);
-        RedisInterface.putTokenTimeout(username, System.currentTimeMillis() + Main.TOKEN_VALID_SECONDS * 1000);
-        RedisInterface.putTokenDelay(username,System.currentTimeMillis() + Main.TOKEN_VERIFY_DELAY * 1000);
+        Main.database.putIp(uuid,ip);
+        Main.database.putToken(uuid,token);
+        Main.database.putTokenTimeout(uuid, System.currentTimeMillis() + Main.TOKEN_VALID_SECONDS * 1000);
+        Main.database.putTokenDelay(uuid,System.currentTimeMillis() + Main.TOKEN_VERIFY_DELAY * 1000);
         return token;
     }
 

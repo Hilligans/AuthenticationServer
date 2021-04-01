@@ -1,5 +1,8 @@
 package Hilligans.Network;
 
+import Hilligans.Network.Packets.CCreateAccount;
+import Hilligans.Network.Packets.CGetToken;
+import Hilligans.Network.Packets.CTokenValid;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.util.ArrayList;
@@ -24,7 +27,9 @@ public abstract class PacketBase {
     public abstract void handle();
 
     public static void register() {
-
+        packets.add(CCreateAccount::new);
+        packets.add(CGetToken::new);
+        packets.add(CTokenValid::new);
 
     }
 

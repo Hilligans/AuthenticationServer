@@ -3,82 +3,75 @@ package Hilligans;
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import redis.clients.jedis.Jedis;
 
-public class RedisInterface {
+public class RedisInterface implements IDatabaseInterface {
 
     static Jedis jedis = new Jedis();
 
-    public static synchronized void putString(String key, String value) {
+    public synchronized void putString(String key, String value) {
         jedis.set(key,value);
     }
 
-    public static synchronized void putToken(String username, String token) {
-        jedis.set('T' + username,token);
+    public synchronized void putToken(String uuid, String token) {
+        jedis.set('T' + uuid,token);
     }
 
-    public static synchronized void putTokenDelay(String username, long delay) {
-        jedis.set('D' + username,Long.toString(delay));
+    public synchronized void putTokenDelay(String uuid, long delay) {
+        jedis.set('D' + uuid,Long.toString(delay));
     }
 
-    public static synchronized void putTokenTimeout(String username, long timeout) {
-        jedis.set('O' + username,Long.toString(timeout));
+    public synchronized void putTokenTimeout(String uuid, long timeout) {
+        jedis.set('O' + uuid,Long.toString(timeout));
     }
 
-    public static void putPassword(String username, String password) {
-        putString('P' + username, hashString(password));
+    public synchronized void putPassword(String uuid, String password) {
+        putString('P' + uuid, hashString(password));
     }
 
-    public static void putIp(String username, String ip) {
-        jedis.set('I' + username, ip);
+    public synchronized void putIp(String uuid, String ip) {
+        jedis.set('I' + uuid, ip);
     }
 
-    public static void putUsername(String email, String username) {
+    public synchronized void putUsername(String email, String username) {
         jedis.set('E' + email, username);
     }
 
-    public static synchronized String getUsername(String email) {
+    public synchronized void putUUID(String username, String uuid) {
+        jedis.set('U' + uuid, uuid);
+    }
+
+    public synchronized String getUsername(String email) {
         return jedis.get('E' + email);
     }
 
-    public static synchronized String getPassword(String username) {
-        return jedis.get('P' + username);
+    public synchronized String getPassword(String uuid) {
+        return jedis.get('P' + uuid);
     }
 
-    public static synchronized String getTokenDelay(String username) {
-        return jedis.get('D' + username);
+    public synchronized String getTokenDelay(String uuid) {
+        return jedis.get('D' + uuid);
     }
 
-    public static synchronized String getTokenTimeout(String username) {
-        return jedis.get('O' + username);
+    public synchronized String getTokenTimeout(String uuid) {
+        return jedis.get('O' + uuid);
     }
 
-    public static synchronized String getStoredToken(String username) {
-        return jedis.get("T" + username);
+    public synchronized String getStoredToken(String uuid) {
+        return jedis.get("T" + uuid);
     }
 
-    public static synchronized String getIp(String username) {
-        return jedis.get('I' + username);
+    public synchronized String getIp(String uuid) {
+        return jedis.get('I' + uuid);
     }
 
-    public static synchronized boolean clientValid(String username) {
-        return  getPassword(username) != null;
+    public synchronized String getUUID(String username) {
+        return jedis.get('U' + username);
     }
 
-    public static boolean passwordValid(String username, String password) {
-        if(!clientValid(username)) {
-            return false;
-        }
-        String storedPassword = getPassword(username);
-        String bcryptHashString = hashString(password);
-        BCrypt.Result result = BCrypt.verifyer().verify(storedPassword.toCharArray(), bcryptHashString);
-
-        return result.verified;
+    public synchronized boolean clientValid(String username) {
+        return getUUID(username) != null;
     }
 
-    public static String hashString(String password) {
-        return BCrypt.withDefaults().hashToString(12, password.toCharArray());
-    }
-
-    public static void stop() {
+    public void stop() {
         jedis.close();
     }
 

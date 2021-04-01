@@ -1,5 +1,6 @@
 package Hilligans.Network.Packets;
 
+import Hilligans.Main;
 import Hilligans.Network.PacketBase;
 import Hilligans.Network.PacketData;
 import Hilligans.Network.ServerNetworkHandler;
@@ -29,8 +30,9 @@ public class CGetToken extends PacketBase {
 
     @Override
     public void handle() {
-        if(RedisInterface.passwordValid(username,password)) {
-            String token = TokenHandler.createNewToken(username, ((InetSocketAddress)ctx.channel().remoteAddress()).getHostName());
+        String uuid = Main.database.getUUID(username);
+        if(Main.database.passwordValid(uuid,password)) {
+            String token = TokenHandler.createNewToken(uuid, ((InetSocketAddress)ctx.channel().remoteAddress()).getHostName());
             ServerNetworkHandler.sendPacket(new SSendToken(token),ctx);
         }
     }

@@ -20,13 +20,9 @@ public class ServerNetworkHandler extends SimpleChannelInboundHandler<PacketData
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         ctx.pipeline().get(SslHandler.class).handshakeFuture().addListener(
-                new GenericFutureListener<Future<Channel>>() {
-                    @Override
-                    public void operationComplete(Future<Channel> future) throws Exception {
-                        // ctx.writeAndFlush(new PacketData(21));
-                        channels.add(ctx.channel());
-                        channelIds.add(ctx.channel().id());
-                    }
+                (GenericFutureListener<Future<Channel>>) future -> {
+                    channels.add(ctx.channel());
+                    channelIds.add(ctx.channel().id());
                 });
         super.channelActive(ctx);
     }
@@ -39,8 +35,10 @@ public class ServerNetworkHandler extends SimpleChannelInboundHandler<PacketData
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, PacketData msg) throws Exception {
-        PacketBase packetBase = msg.createPacket();
-        packetBase.handle();
+        try {
+            PacketBase packetBase = msg.createPacket();
+            packetBase.handle();
+        } catch (Exception ignored) {}
     }
 
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {

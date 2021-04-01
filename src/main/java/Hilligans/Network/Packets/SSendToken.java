@@ -7,7 +7,7 @@ public class SSendToken extends PacketBase {
 
     String token;
     public SSendToken(String token) {
-        super(4);
+        super(1);
         this.token = token;
     }
 
