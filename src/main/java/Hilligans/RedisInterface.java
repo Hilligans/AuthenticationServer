@@ -36,7 +36,11 @@ public class RedisInterface implements IDatabaseInterface {
     }
 
     public synchronized void putUUID(String username, String uuid) {
-        jedis.set('U' + uuid, uuid);
+        jedis.set('U' + username, uuid);
+    }
+
+    public String putEmailToken(String username, String token) {
+        return jedis.set('V' + username, token);
     }
 
     public synchronized String getUsername(String email) {
@@ -67,7 +71,12 @@ public class RedisInterface implements IDatabaseInterface {
         return jedis.get('U' + username);
     }
 
+    public String getEmailToken(String username) {
+        return jedis.get('V' + username);
+    }
+
     public synchronized boolean clientValid(String username) {
+        System.out.println(getUUID(username));
         return getUUID(username) != null;
     }
 

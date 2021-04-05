@@ -38,7 +38,9 @@ public class ServerNetworkHandler extends SimpleChannelInboundHandler<PacketData
         try {
             PacketBase packetBase = msg.createPacket();
             packetBase.handle();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
     }
 
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
@@ -61,7 +63,13 @@ public class ServerNetworkHandler extends SimpleChannelInboundHandler<PacketData
 
 
     public static ChannelFuture sendPacket(PacketBase packetBase, ChannelHandlerContext ctx) {
-        return ctx.channel().writeAndFlush(new PacketData(packetBase));
+        return ctx.channel().writeAndFlush(new PacketData(packetBase)).addListeners(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                future.await(100);
+                future.channel().close();
+            }
+        });
     }
 
 

@@ -17,7 +17,7 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 public class ServerNetworkInit extends ChannelInitializer<SocketChannel> {
     public static Channel channel;
 
-    public static void startServer(String port) throws Exception {
+    public static void  startServer(String port) throws Exception {
 
         final int PORT = Integer.parseInt(System.getProperty("port", port));
 

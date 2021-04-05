@@ -24,6 +24,14 @@ public class TokenHandler {
         return new String(buf);
     }
 
+    public static String getToken(int length) {
+        char[] buf = new char[length];
+        int salt = (int) (System.nanoTime() & 31);
+        for (int idx = 0; idx < buf.length; ++idx)
+            buf[idx] = getChar(Math.abs(Integer.rotateRight(random.nextInt(),salt)));
+        return new String(buf);
+    }
+
     public static char getChar(int index) {
         return symbols[index % symbols.length];
     }

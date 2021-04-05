@@ -20,6 +20,8 @@ public interface IDatabaseInterface {
 
     void putUUID(String username, String uuid);
 
+    String putEmailToken(String username, String token);
+
     String getUsername(String email);
 
     String getPassword(String uuid);
@@ -33,6 +35,8 @@ public interface IDatabaseInterface {
     String getIp(String uuid);
 
     String getUUID(String username);
+
+    String getEmailToken(String username);
 
     boolean clientValid(String username);
 

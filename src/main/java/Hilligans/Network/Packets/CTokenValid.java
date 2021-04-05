@@ -30,7 +30,7 @@ public class CTokenValid extends PacketBase {
     public void handle() {
         String uuid = Main.database.getUUID(username);
         if(Main.database.clientValid(username)) {
-            ServerNetworkHandler.sendPacket(new STokenValid(username, uuid, TokenHandler.tokenValid(uuid, token, ip)));
+            ServerNetworkHandler.sendPacket(new STokenValid(username, uuid, TokenHandler.tokenValid(uuid, token, ip)),ctx);
         }
     }
 }
