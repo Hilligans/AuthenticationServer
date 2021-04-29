@@ -13,7 +13,7 @@ import java.net.InetSocketAddress;
 public class CGetToken extends PacketBase {
 
     String username;
-    String password;
+    String loginToken;
 
     public CGetToken() {
         super(1);
@@ -25,15 +25,21 @@ public class CGetToken extends PacketBase {
     @Override
     public void decode(PacketData packetData) {
         username = packetData.readString();
-        password = packetData.readString();
+        loginToken = packetData.readString();
     }
 
     @Override
     public void handle() {
-        String uuid = Main.database.getUUID(username);
-        if(Main.database.passwordValid(uuid,password)) {
-            String token = TokenHandler.createNewToken(uuid, ((InetSocketAddress)ctx.channel().remoteAddress()).getHostName());
-            ServerNetworkHandler.sendPacket(new SSendToken(token),ctx);
+        if (Main.database.clientValid(username)) {
+            String uuid = Main.database.getUUID(username);
+            if(Main.database.getLoginToken(uuid).equals(loginToken)) {
+                String token = TokenHandler.createNewToken(uuid, ((InetSocketAddress)ctx.channel().remoteAddress()).getAddress().getHostAddress());
+                ServerNetworkHandler.sendPacket(new SSendToken(token),ctx);
+            } else {
+                String token = TokenHandler.getToken(64);
+                Main.database.putLoginToken(uuid,token);
+                ServerNetworkHandler.sendPacket(new SSendToken(""),ctx);
+            }
         }
     }
 }

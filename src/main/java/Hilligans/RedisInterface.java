@@ -1,11 +1,12 @@
 package Hilligans;
 
+import Hilligans.Database.JedisInitializer;
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import redis.clients.jedis.Jedis;
 
 public class RedisInterface implements IDatabaseInterface {
 
-    static Jedis jedis = new Jedis();
+    static Jedis jedis;
 
     public synchronized void putString(String key, String value) {
         jedis.set(key,value);
@@ -39,8 +40,12 @@ public class RedisInterface implements IDatabaseInterface {
         jedis.set('U' + username, uuid);
     }
 
-    public String putEmailToken(String username, String token) {
-        return jedis.set('V' + username, token);
+    public synchronized void putEmailToken(String username, String token) {
+        jedis.set('V' + username, token);
+    }
+
+    public synchronized void putLoginToken(String uuid, String token) {
+        jedis.set('L' + uuid,token);
     }
 
     public synchronized String getUsername(String email) {
@@ -71,12 +76,15 @@ public class RedisInterface implements IDatabaseInterface {
         return jedis.get('U' + username);
     }
 
-    public String getEmailToken(String username) {
+    public synchronized String getEmailToken(String username) {
         return jedis.get('V' + username);
     }
 
+    public synchronized String getLoginToken(String uuid) {
+        return jedis.get('L' + uuid);
+    }
+
     public synchronized boolean clientValid(String username) {
-        System.out.println(getUUID(username));
         return getUUID(username) != null;
     }
 

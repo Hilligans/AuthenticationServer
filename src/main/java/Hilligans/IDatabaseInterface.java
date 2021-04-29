@@ -20,7 +20,9 @@ public interface IDatabaseInterface {
 
     void putUUID(String username, String uuid);
 
-    String putEmailToken(String username, String token);
+    void putEmailToken(String username, String token);
+
+    void putLoginToken(String uuid, String token);
 
     String getUsername(String email);
 
@@ -38,6 +40,8 @@ public interface IDatabaseInterface {
 
     String getEmailToken(String username);
 
+    String getLoginToken(String uuid);
+
     boolean clientValid(String username);
 
     void stop();
@@ -47,8 +51,7 @@ public interface IDatabaseInterface {
             return false;
         }
         String storedPassword = getPassword(uuid);
-        String bcryptHashString = hashString(password);
-        BCrypt.Result result = BCrypt.verifyer().verify(storedPassword.toCharArray(), bcryptHashString);
+        BCrypt.Result result = BCrypt.verifyer().verify(password.toCharArray(), storedPassword);
 
         return result.verified;
     }

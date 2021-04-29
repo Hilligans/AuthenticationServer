@@ -61,17 +61,13 @@ public class ServerNetworkHandler extends SimpleChannelInboundHandler<PacketData
         return null;
     }
 
-
     public static ChannelFuture sendPacket(PacketBase packetBase, ChannelHandlerContext ctx) {
-        return ctx.channel().writeAndFlush(new PacketData(packetBase)).addListeners(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-                future.await(100);
-                future.channel().close();
+        return ctx.channel().writeAndFlush(new PacketData(packetBase)).addListeners((ChannelFutureListener) future -> {
+            if (ctx.channel().isOpen()) {
+                ctx.channel().close().awaitUninterruptibly(100);
             }
         });
     }
-
 
     public static void sendPacket(PacketBase packetBase, ChannelId channelId) {
         channels.find(channelId).writeAndFlush(new PacketData(packetBase));

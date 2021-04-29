@@ -11,6 +11,7 @@ public class CTokenValid extends PacketBase {
     String username;
     String token;
     String ip;
+    String tempId;
 
     public CTokenValid() {
         super(2);
@@ -24,13 +25,14 @@ public class CTokenValid extends PacketBase {
         username = packetData.readString();
         token = packetData.readString();
         ip = packetData.readString();
+        tempId = packetData.readString();
     }
 
     @Override
     public void handle() {
         String uuid = Main.database.getUUID(username);
         if(Main.database.clientValid(username)) {
-            ServerNetworkHandler.sendPacket(new STokenValid(username, uuid, TokenHandler.tokenValid(uuid, token, ip)),ctx);
+            ServerNetworkHandler.sendPacket(new STokenValid(username, uuid, TokenHandler.tokenValid(uuid, token, ip, ctx),tempId),ctx);
         }
     }
 }

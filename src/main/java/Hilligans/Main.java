@@ -1,12 +1,17 @@
 package Hilligans;
 
 
+import Hilligans.Database.JedisInitializer;
 import Hilligans.Network.PacketBase;
 import Hilligans.Network.ServerNetworkInit;
 
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Properties;
 
 public class Main {
@@ -26,10 +31,14 @@ public class Main {
     public static Session session;
 
     public static void main(String[] args) throws Exception {
+        ArrayList<String> data = readShader("/data.txt");
+        String pathToJedis = "";
+        if(data != null && data.size() >= 2) {
+            password = data.get(0);
+            pathToJedis = data.get(1);
+        }
 
-        String host = "localhost";
         Properties properties = System.getProperties();
-        //properties.setProperty("mail.smtp.host", host);
         properties.put("mail.smtp.host", "smtp.gmail.com"); //SMTP Host
         properties.put("mail.smtp.ssl.trust", "smtp.gmail.com");
         properties.put("mail.smtp.port", "587"); //TLS Port
@@ -43,10 +52,23 @@ public class Main {
         });
 
         database = new RedisInterface();
+        RedisInterface.jedis = new JedisInitializer("win10","redis-server.exe",pathToJedis);
         PacketBase.register();
         System.out.println("Starting Server on port: " + port);
         ServerNetworkInit.startServer(port);
     }
+
+    public static ArrayList<String> readShader(String source) {
+        InputStream stream = Main.class.getResourceAsStream(source);
+        if(stream == null) {
+            return null;
+        }
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        ArrayList<String> strings = new ArrayList<>();
+        reader.lines().forEach(strings::add);
+        return strings;
+    }
+
 
 
 }

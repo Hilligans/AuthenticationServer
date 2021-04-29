@@ -2,7 +2,9 @@ package Hilligans;
 
 import Hilligans.Main;
 import Hilligans.RedisInterface;
+import io.netty.channel.ChannelHandlerContext;
 
+import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -14,7 +16,7 @@ public class TokenHandler {
     public static final String alphanum = "ABCDEFGHIJKLMNOPQRSTUVQXYZabcdefghijklmnopqrstuvwxyz1234567890`!@#$%^&*()-_=+~[]\\;',./{}|:\"<>?;";
     private static final char[] symbols = alphanum.toCharArray();
     static Random random = new SecureRandom();
-    static final int length = 64;
+    static final int length = 48;
 
     public static String getToken() {
         char[] buf = new char[length];
@@ -36,23 +38,27 @@ public class TokenHandler {
         return symbols[index % symbols.length];
     }
 
-    public static boolean tokenValid(String uuid, String token, String ip) {
+    public static boolean tokenValid(String uuid, String token, String ip, ChannelHandlerContext ctx) {
+        if(ip.equals("127.0.0.1")) {
+            ip = ((InetSocketAddress)ctx.channel().remoteAddress()).getAddress().getHostAddress();
+        }
         if(Main.database.getStoredToken(uuid).equals(token)) {
-            long time = Integer.parseInt(Main.database.getTokenDelay(uuid));
-            Main.database.putTokenDelay(uuid,System.currentTimeMillis() + Main.TOKEN_VERIFY_DELAY * 1000);
+            long time = Long.parseLong(Main.database.getTokenDelay(uuid));
             long currentTime = System.currentTimeMillis();
             if(Main.database.getIp(uuid).equals(ip)) {
                 if (currentTime - time > Main.TOKEN_VERIFY_DELAY * 1000) {
-                    long tokenExpire = Integer.parseInt(Main.database.getTokenTimeout(uuid));
+                    long tokenExpire = Long.parseLong(Main.database.getTokenTimeout(uuid));
                     return tokenExpire > currentTime;
                 } else {
+                    Main.database.putTokenDelay(uuid,System.currentTimeMillis());
                     return false;
                 }
             } else {
+                Main.database.putTokenDelay(uuid,System.currentTimeMillis());
                 return false;
             }
         } else {
-            Main.database.putTokenDelay(uuid,System.currentTimeMillis() + Main.TOKEN_VERIFY_DELAY * 1000);
+            Main.database.putTokenDelay(uuid,System.currentTimeMillis());
             return false;
         }
     }
@@ -62,7 +68,7 @@ public class TokenHandler {
         Main.database.putIp(uuid,ip);
         Main.database.putToken(uuid,token);
         Main.database.putTokenTimeout(uuid, System.currentTimeMillis() + Main.TOKEN_VALID_SECONDS * 1000);
-        Main.database.putTokenDelay(uuid,System.currentTimeMillis() + Main.TOKEN_VERIFY_DELAY * 1000);
+        Main.database.putTokenDelay(uuid,System.currentTimeMillis());
         return token;
     }
 

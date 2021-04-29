@@ -2,6 +2,7 @@ package Hilligans.Network;
 
 import Hilligans.Network.Packets.CCreateAccount;
 import Hilligans.Network.Packets.CGetToken;
+import Hilligans.Network.Packets.CLogin;
 import Hilligans.Network.Packets.CTokenValid;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -30,6 +31,7 @@ public abstract class PacketBase {
         packets.add(CCreateAccount::new);
         packets.add(CGetToken::new);
         packets.add(CTokenValid::new);
+        packets.add(CLogin::new);
 
     }
 
